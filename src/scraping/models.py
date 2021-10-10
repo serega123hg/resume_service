@@ -7,6 +7,7 @@ from scraping.utils import from_cyrillic_to_eng
 def default_urls():
     return {"work": "", "rabota": "", "dou": "", "djinni": ""}
 
+# модели для базы данных
 
 class City(models.Model):
     name = models.CharField(max_length=50,
@@ -21,6 +22,7 @@ class City(models.Model):
     def __str__(self):
         return self.name
 
+    # переопределяем метод сохранения в бд, чтобы записать slug автоматически, если необходимо
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = from_cyrillic_to_eng(str(self.name))
