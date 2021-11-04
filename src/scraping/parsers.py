@@ -3,7 +3,7 @@ import codecs
 from bs4 import BeautifulSoup as BS
 from random import randint
 
-__all__ = ('work', "rabota", 'dou', 'djinni')
+__all__ = ('hhru', 'rabotaru', 'vkrabota', 'work', "rabota", 'djinni')
 
 headers = [
     {'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:47.0) Gecko/20100101 Firefox/47.0',
@@ -13,6 +13,95 @@ headers = [
     {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:53.0) Gecko/20100101 Firefox/53.0',
         'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'}
     ]
+
+def hhru(url, city=None, language=None):
+    jobs = []
+    errors = []
+    domain = 'https://hh.ru'
+    if url:
+        resp = requests.get(url, headers=headers[randint(0, 2)])
+        if resp.status_code == 200:
+            soup = BS(resp.content, 'html.parser')
+            main_div = soup.find('div', attrs={'class': 'vacancy-serp'})
+            if main_div:
+                div_lst = main_div.find_all('div', attrs={'class': 'vacancy-serp-item'})
+                for div in div_lst:
+                    title = div.find('span', attrs={'class': 'resume-search-item__name'})
+                    href = title.a['href']
+                    content = div.find_all('div', attrs={'class': 'vacancy-serp-item__info'})[2].text
+                    company = div.find('div', attrs={'class': 'vacancy-serp-item__meta-info-company'}).text
+                    logo = div.find('img')
+                    if logo:
+                        company = logo['alt']
+                    jobs.append({'title': title.text, 'url': href,
+                                 'description': content, 'company': company,
+                                 'city_id': city, 'language_id': language})
+            else:
+                errors.append({'url': url, 'title': "Div does not exists"})
+        else:
+            errors.append({'url': url, 'title': "Page do not response"})
+
+    return jobs, errors
+
+
+def rabotaru(url, city=None, language=None):
+    jobs = []
+    errors = []
+    domain = 'https://www.rabota.ru'
+    if url:
+        resp = requests.get(url, headers=headers[randint(0, 2)])
+        if resp.status_code == 200:
+            soup = BS(resp.content, 'html.parser')
+            main_div = soup.find('div', attrs={'class': 'index-page__body'})
+            if main_div:
+                div_lst = main_div.find_all('div', attrs={'class': 'vacancy-preview-card__wrapper white-box'})
+                for div in div_lst:
+                    title = div.find('h3').text.strip()
+                    href = div.find('h3').a['href']
+                    content = div.find_all('div', attrs={'class': 'vacancy-preview-card__content'})[0].text
+                    company = div.find('div', attrs={'class': 'vacancy-preview-card__company'}).text
+                    logo = div.find('img')
+                    if logo:
+                        company = logo['alt']
+                    jobs.append({'title': title, 'url': domain + href,
+                                 'description': content, 'company': company,
+                                 'city_id': city, 'language_id': language})
+            else:
+                errors.append({'url': url, 'title': "Div does not exists"})
+        else:
+            errors.append({'url': url, 'title': "Page do not response"})
+
+    return jobs, errors
+
+
+def vkrabota(url, city=None, language=None):
+    jobs = []
+    errors = []
+    domain = 'https://vkrabota.ru'
+    if url:
+        resp = requests.get(url, headers=headers[randint(0, 2)])
+        if resp.status_code == 200:
+            soup = BS(resp.content, 'html.parser')
+            main_div = soup.find_all('div', attrs={'data-test-id': 'JobCard'})
+            if main_div:
+               # div_lst = main_div.find_all('div', attrs={'class': 'vacancy-preview-card__wrapper white-box'})
+                for div in main_div:
+                    title = div.find('a').text
+                    href = div.a['href']
+                    content = div.find('div', attrs={'class': 'jobCard_description__19MZ1'}).text
+                    company = div.find_all('span')[0].text
+                    logo = div.find('img')
+                    if logo:
+                        company = logo['alt']
+                    jobs.append({'title': title, 'url': domain + href,
+                                 'description': content, 'company': company,
+                                 'city_id': city, 'language_id': language})
+            else:
+                errors.append({'url': url, 'title': "Div does not exists"})
+        else:
+            errors.append({'url': url, 'title': "Page do not response"})
+
+    return jobs, errors
 
 
 def work(url, city=None, language=None):
@@ -63,12 +152,12 @@ def rabota(url, city=None, language=None):
                     for tr in tr_lst:
                         div = tr.find('div',  attrs={'class': 'card-body'})
                         if div:
-                            title = div.find('p',
+                            title = div.find('h2',
                                              attrs={'class': 'card-title'})
                             href = title.a['href']
                             content = div.p.text
                             company = 'No name'
-                            p = div.find('p', attrs={'class': 'company-name'})
+                            p = div.find('h2', attrs={'class': 'company-name'})
                             if p:
                                 company = p.a.text
                             jobs.append({
@@ -87,35 +176,6 @@ def rabota(url, city=None, language=None):
     return jobs, errors
 
 
-def dou(url, city=None, language=None):
-    jobs = []
-    errors = []
-    # domain = 'https://www.work.ua'
-    if url:
-        resp = requests.get(url, headers=headers[randint(0, 2)])
-        if resp.status_code == 200:
-            soup = BS(resp.content, 'html.parser')
-            main_div = soup.find('div', id='vacancyListId')
-            if main_div:
-                li_lst = main_div.find_all('li', attrs={'class': 'l-vacancy'})
-                for li in li_lst:
-                    title = li.find('div', attrs={'class': 'title'})
-                    href = title.a['href']
-                    cont = li.find('div', attrs={'class': 'sh-info'})
-                    content = cont.text
-                    company = 'No name'
-                    a = title.find('a', attrs={'class': 'company'})
-                    if a:
-                        company = a.text
-                    jobs.append({'title': title.text, 'url': href,
-                                 'description': content, 'company': company,
-                                 'city_id': city, 'language_id': language})
-            else:
-                errors.append({'url': url, 'title': "Div does not exists"})
-        else:
-            errors.append({'url': url, 'title': "Page do not response"})
-
-    return jobs, errors
 
 
 def djinni(url, city=None, language=None):

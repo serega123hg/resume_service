@@ -5,7 +5,7 @@ from scraping.utils import from_cyrillic_to_eng
 
 
 def default_urls():
-    return {"work": "", "rabota": "", "dou": "", "djinni": ""}
+    return {"work": "", "rabota": "", "djinni": "","hhru": "","vkrabota": "", "rabotaru": ""}
 
 # модели для базы данных
 

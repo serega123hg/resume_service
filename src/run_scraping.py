@@ -19,8 +19,10 @@ from scraping.models import Vacancy, Error, Url
 User = get_user_model()
 
 parsers = (
+    (hhru, 'hhru'),
+    (rabotaru, 'rabotaru'),
+    (vkrabota, 'vkrabota'),
     (work, 'work'),
-    (dou, 'dou'),
     (djinni, 'djinni'),
     (rabota, 'rabota')
 )
@@ -37,6 +39,7 @@ def get_urls(_settings):
     qs = Url.objects.all().values()
     url_dict = {(q['city_id'], q['language_id']): q['url_data'] for q in qs}
     urls = []
+    
     for pair in _settings:
         if pair in url_dict:
             tmp = {}
@@ -46,6 +49,7 @@ def get_urls(_settings):
             if url_data:
                 tmp['url_data'] = url_dict.get(pair)
                 urls.append(tmp)
+                print(urls)
     return urls
 
 
