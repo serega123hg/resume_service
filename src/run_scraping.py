@@ -29,27 +29,36 @@ parsers = (
 jobs, errors = [], []
 
 
-def get_settings():
-    qs = User.objects.filter(send_email=True).values()
-    settings_lst = set((q['city_id'], q['language_id']) for q in qs)
-    return settings_lst
+# def get_settings():
+#     #qs = User.objects.filter(send_email=True).values()
+#     qs = User.objects.values()
+#     settings_lst = set((q['city_id'], q['language_id']) for q in qs)
+#     print(settings_lst)
+#     return settings_lst
 
 
-def get_urls(_settings):
-    qs = Url.objects.all().values()
-    url_dict = {(q['city_id'], q['language_id']): q['url_data'] for q in qs}
-    urls = []
+# def get_urls(_settings):
+#     qs = Url.objects.all().values()
+#     url_dict = {(q['city_id'], q['language_id']): q['url_data'] for q in qs}
+#     urls = []
     
-    for pair in _settings:
-        if pair in url_dict:
-            tmp = {}
-            tmp['city'] = pair[0]
-            tmp['language'] = pair[1]
-            url_data = url_dict.get(pair)
-            if url_data:
-                tmp['url_data'] = url_dict.get(pair)
-                urls.append(tmp)
-                print(urls)
+#     for pair in _settings:
+#         if pair in url_dict:
+#             tmp = {}
+#             tmp['city'] = pair[0]
+#             tmp['language'] = pair[1]
+#             url_data = url_dict.get(pair)
+#             if url_data:
+#                 tmp['url_data'] = url_dict.get(pair)
+#                 urls.append(tmp)
+#                 print(urls)
+#     return urls
+
+def get_urls():
+    qs = Url.objects.all().values()
+    #url_dict = {(q['city_id'], q['language_id']): q['url_data'] for q in qs}
+    urls = [{'url_data': q['url_data'], 'city': q['city_id'], 'language': q['language_id']}  for q in qs]
+    
     return urls
 
 
@@ -59,8 +68,9 @@ async def main(value):
     errors.extend(err)
     jobs.extend(job)
 
-settings = get_settings()
-url_list = get_urls(settings)
+#settings = get_settings()
+#url_list = get_urls(settings)
+url_list = get_urls()
 
 # ассинхронность для скрапинга, чтобы сервис не зависал, когда парсит
 loop = asyncio.get_event_loop()

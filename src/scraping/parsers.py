@@ -88,7 +88,12 @@ def vkrabota(url, city=None, language=None):
                 for div in main_div:
                     title = div.find('a').text
                     href = div.a['href']
-                    content = div.find('div', attrs={'class': 'jobCard_description__19MZ1'}).text
+                    #print(div.find('div').find_all('div')[0].get('class'))
+                    cnts = [ 
+                        x for x in div.find('div').find_all('div')
+                        if x.get('class') and x.get('class')[0].startswith('jobCard_description')] 
+                    #content = div.find('div', attrs={'class': 'jobCard_description__19MZ1'}).text
+                    content = cnts[0].text
                     company = div.find_all('span')[0].text
                     logo = div.find('img')
                     if logo:
